@@ -1,7 +1,15 @@
 {
-  "functions": {
-    "api/ingest.py": {
-      "runtime": "python3.9"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/ingest.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/api/ingest",
+      "dest": "api/ingest.py"
+    }
+  ]
 }
