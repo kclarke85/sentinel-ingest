@@ -1,4 +1,3 @@
-from http.server import BaseHTTPRequestHandler
 from pymongo import MongoClient
 from datetime import datetime
 import json
@@ -6,19 +5,25 @@ import os
 
 MONGO_URI = os.environ.get("MONGO_URI")
 
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        body = self.rfile.read(content_length)
-        data = json.loads(body)
-
-        client = MongoClient(MONGO_URI)
-        db = client["encounter_db"]
-        data["timestamp"] = datetime.utcnow().isoformat()
-        db["readings"].insert_one(data)
-        client.close()
-
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({"message": "Reading stored"}).encode())
+def handler(request):
+    if request.method == "POST":
+        try:
+            data = request.json()
+            client = MongoClient(MONGO_URI)
+            db = client["encounter_db"]
+            data["timestamp"] = datetime.utcnow().isoformat()
+            db["readings"].insert_one(data)
+            client.close()
+            return {
+                "statusCode": 200,
+                "body": json.dumps({"message": "Reading stored", "device": data.get("device_id")})
+            }
+        except Exception as e:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": str(e)})
+            }
+    return {
+        "statusCode": 405,
+        "body": json.dumps({"error": "Method not allowed"})
+    }
