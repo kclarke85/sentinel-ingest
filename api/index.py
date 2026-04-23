@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from datetime import datetime
 import json
 import os
+import ssl
 
 MONGO_URI = os.environ.get("MONGO_URI")
 
@@ -14,9 +15,12 @@ class handler(BaseHTTPRequestHandler):
         try:
             client = MongoClient(
                 MONGO_URI,
-                serverSelectionTimeoutMS=3000,
-                connectTimeoutMS=3000,
-                socketTimeoutMS=3000
+                tls=True,
+                tlsAllowInvalidCertificates=True,
+                tlsAllowInvalidHostnames=True,
+                serverSelectionTimeoutMS=8000,
+                connectTimeoutMS=8000,
+                socketTimeoutMS=8000
             )
             db = client["encounter_db"]
             data["timestamp"] = datetime.utcnow().isoformat()
