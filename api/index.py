@@ -12,7 +12,12 @@ class handler(BaseHTTPRequestHandler):
         body = self.rfile.read(length)
         data = json.loads(body)
         try:
-            client = MongoClient(MONGO_URI)
+            client = MongoClient(
+                MONGO_URI,
+                serverSelectionTimeoutMS=3000,
+                connectTimeoutMS=3000,
+                socketTimeoutMS=3000
+            )
             db = client["encounter_db"]
             data["timestamp"] = datetime.utcnow().isoformat()
             db["readings"].insert_one(data)
